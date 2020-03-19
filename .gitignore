@@ -1,2 +1,10 @@
-nltk_stemmed.pkl
+# paths
+*egg-info/
+.ipynb_checkpoints/
+.mypy_cache/
+venv/
+
+# files
+*.pyc
 clustered.pkl
+nltk_stemmed.pkl
