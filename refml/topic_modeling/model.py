@@ -36,7 +36,7 @@ def refml_model(preprocessed_words, n_topics, n_top_words):
     X_train_tfidf = tfidf_transformer.fit_transform(x_counts)
 
     #initialize nmf model
-    model = NMF(n_components=n_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd').fit(X_train_tfidf.T)
+    model = NMF(n_components=n_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd')
 
     #fit model to data
     nmf = model.fit(X_train_tfidf.T)
