@@ -6,63 +6,60 @@ import numpy as np
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import normalize
 
-def get_nmf_topics(vectorizer, model, n_top_words):
+def get_nmf_topics(model, n_top_words, n_topics, vectorizer):
     
     #the word ids obtained need to be reverse-mapped to the words so we can print the topic names.
     feat_names = vectorizer.get_feature_names()
     
     word_dict = {}
-    for i in range(n_top_words):
+    for i in range(n_topics):
         
         #for each topic, obtain the largest values, and add the words they map to into the dictionary.
         words_ids = model.components_[i].argsort()[:-n_top_words - 1:-1]
         words = [feat_names[key] for key in words_ids]
-        wordstring = str("")
+        wordstring = str('')
         for word in words:
-            wordstring += word + " "
+            wordstring += word + ' '
         word_dict[i] = wordstring
     
-    return pd.Series(word_dict)
+    return pd.Series(word_dict, name = 'top words')
 
-def refml_model(preprocessed_words, n_topics, n_top_words):
 
-    #vectorize strings
-    vectorizer = CountVectorizer(analyzer='word', max_features=5000)
+def refml_model(preprocessed_words, n_topics, n_top_words, n_dimensions, perplexity):
+    
+    #vectorize preprocessed text
+    vectorizer = CountVectorizer(analyzer='word')#, max_features=5000)
     x_counts = vectorizer.fit_transform(preprocessed_words)
 
-    #tfidf encode vectorized strings
+    #Tfidf encoding
     tfidf_transformer = TfidfTransformer()
     X_train_tfidf = tfidf_transformer.fit_transform(x_counts)
 
-    #initialize nmf model
-    model = NMF(n_components=n_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd')
+    #NMF topic modeling
+    model = NMF(n_components=n_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd').fit(X_train_tfidf.T)
 
-    #fit model to data
-    nmf = model.fit(X_train_tfidf.T)
-    
-    # get top words for each cluster
-    top_words = pd.DataFrame(get_nmf_topics(vectorizer = vectorizer, model = nmf, n_top_words = n_top_words), columns = ['top words'])
+    #Match categories to original titles
+    topic_values = model.fit_transform(X_train_tfidf)
+    clustered = pd.DataFrame(topic_values.argmax(axis=1), columns = ['category'])
 
-    # label clusters
-    topic_values = pd.DataFrame(model.fit_transform(X_train_tfidf).argmax(axis=1), columns = ['category'])
+    #get top words
+    top_words = get_nmf_topics(model, n_top_words, n_topics, vectorizer)
 
-    clusterdf = pd.merge(top_words, topic_values, right_on='category', left_index=True)
+    #dimensionality reduction
+    nmf_embedded = TSNE(n_components=n_dimensions, perplexity=perplexity).fit_transform(model.components_.T)
 
-    return nmf, clusterdf
+    export = pd.merge(top_words, clustered, right_on='category', left_index=True).join(pd.DataFrame(nmf_embedded))
 
-def tsne_reduce(model_output, n_dimensions, perplexity):
-    
-    nmf_embedded = TSNE(n_components=n_dimensions, perplexity=perplexity).fit_transform(model_output.components_.T)
-
-    return pd.DataFrame(nmf_embedded)
+    return export
 
 def visualize(tsne_reduced_df, n_dimensions):
     
     if n_dimensions == 2:
         fig = px.scatter(tsne_reduced_df, x= 0, y= 1, 
                     color = 'category', color_continuous_scale = 'Rainbow',
-                   hover_data = ['top words', 'Text'])
+                   hover_data = ['top words', 'Title'])
         fig.update_traces(marker = dict(size=5))
         fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
         return fig
@@ -70,7 +67,7 @@ def visualize(tsne_reduced_df, n_dimensions):
     elif n_dimensions == 3:
         fig = px.scatter_3d(tsne_reduced_df, x= 0, y= 1, z= 2, 
                     color = 'category', color_continuous_scale = 'Rainbow',
-                   hover_data = ['top words', 'Text'])
+                   hover_data = ['top words', 'Title'])
         fig.update_traces(marker = dict(size=3))
         return fig
     
