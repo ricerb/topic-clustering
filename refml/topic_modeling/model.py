@@ -48,7 +48,8 @@ def refml_model(preprocessed_words, n_topics, n_top_words, n_dimensions, perplex
     top_words = get_nmf_topics(model, n_top_words, n_topics, vectorizer)
 
     #dimensionality reduction
-    nmf_embedded = TSNE(n_components=n_dimensions, perplexity=perplexity).fit_transform(model.components_.T)
+    nmf = model.fit(X_train_tfidf.T)
+    nmf_embedded = TSNE(n_components=n_dimensions, perplexity=perplexity).fit_transform(nmf.components_.T)
 
     export = pd.merge(top_words, clustered, right_on='category', left_index=True).join(pd.DataFrame(nmf_embedded))
 
