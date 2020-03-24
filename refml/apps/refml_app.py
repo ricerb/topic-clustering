@@ -2,12 +2,12 @@ from refml.topic_modeling.preprocess import stem_and_tokenize
 from refml.topic_modeling.model import refml_model, visualize
 import streamlit as st
 import pandas as pd
-import base64
+import os
 
 st.markdown('# REFML Prototype')
 st.sidebar.markdown('## Modeling options:')
 
-data = st.sidebar.radio('Which test dataset?', ['Night Work', 'Ozone'])
+data = st.sidebar.radio('Which test dataset?', ['Night Work', 'Ozone', 'User Input'])
 
 n_topics = st.sidebar.slider('Number of topics: ', 5, 50, 20, step = 1)
 
@@ -26,11 +26,26 @@ def load_and_process(data):
 
         ## apply text preprocessing to text input field
         df['Text_Processed'] = df['Text'].apply(stem_and_tokenize)
+        
     elif data == 'Ozone':
         df = pd.read_pickle('ozone_data_fromhero.pkl').iloc[:10000,:]
         df['Text'] = df['TITLE'] + " " + df['ABSTRACT'].astype(str)
         df['Title'] = df['TITLE']
         df['Text_Processed'] = df['Text'].apply(stem_and_tokenize)
+
+    elif data == 'User Input':
+        filename = st.text_input('Enter a file path:')
+        os.chdir('C:/')
+        if '.csv' in filename:
+            df = pd.read_csv(filename)
+        if '.xls' in filename:
+            df = pd.read_excel(filename)
+        else:
+            st.error('File not found. Enter the full file path. File type .csv, .xlsx or .xls required.')
+        
+        Text = st.selectbox('Pick the text input column:', df.columns.tolist())
+        df['Text_Processed'] = df[Text].apply(stem_and_tokenize)
+
     return df
 
 @st.cache
