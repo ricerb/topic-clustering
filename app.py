@@ -36,7 +36,7 @@ def model():
 
 @st.cache
 def visual():
-    return visualize(export, n_dimensions = 2)
+    return visualize(export, n_dimensions = n_dimensions)
 
 df = load_and_process()
 export = model()
