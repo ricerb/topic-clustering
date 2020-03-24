@@ -7,6 +7,8 @@ import base64
 st.markdown('# REFML Prototype')
 st.sidebar.markdown('## Modeling options:')
 
+data = st.sidebar.radio('Which test dataset?', ['Night Work', 'Ozone'])
+
 n_topics = st.sidebar.slider('Number of topics: ', 5, 50, 20, step = 1)
 
 st.sidebar.markdown('## Visualization options:')
@@ -16,13 +18,19 @@ n_top_words = st.sidebar.slider('Number of top words:', 3, 15, 5, step = 5)
 perplexity = st.sidebar.slider('TSNE perplexity:', 5, 50, 20, step = 1)
 
 @st.cache
-def load_and_process():
-    ## load data:
-    df = pd.read_excel('Night Shift Work and Light at Night_ Human cancer and biomonitoring studies (2018)-refs.xlsx')
-    df['Text'] = df['Title'] + " " + df['Abstract'].astype(str)
+def load_and_process(data):
+    if data == 'Night Work':
+        ## load data:
+        df = pd.read_excel('Night Shift Work and Light at Night_ Human cancer and biomonitoring studies (2018)-refs.xlsx')
+        df['Text'] = df['Title'] + " " + df['Abstract'].astype(str)
 
-    ## apply text preprocessing to text input field
-    df['Text_Processed'] = df['Text'].apply(stem_and_tokenize)
+        ## apply text preprocessing to text input field
+        df['Text_Processed'] = df['Text'].apply(stem_and_tokenize)
+    elif data == 'Ozone':
+        df = pd.read_pickle('ozone_data_fromhero.pkl').iloc[:10000,:]
+        df['Text'] = df['TITLE'] + " " + df['ABSTRACT'].astype(str)
+        df['Title'] = df['TITLE']
+        df['Text_Processed'] = df['Text'].apply(stem_and_tokenize)
     return df
 
 @st.cache
@@ -38,7 +46,7 @@ def model():
 def visual():
     return visualize(export, n_dimensions = n_dimensions)
 
-df = load_and_process()
+df = load_and_process(data)
 export = model()
 fig = visual()
 
