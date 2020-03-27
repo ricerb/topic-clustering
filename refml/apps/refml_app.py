@@ -6,7 +6,6 @@ import os
 
 st.markdown('# REFML Prototype')
 
-
 def upload():
     file = st.sidebar.file_uploader('Upload File (csv or excel) and select a column to run refml on.', type = ['csv', 'xls', 'xlsx'])
     if file:
@@ -32,7 +31,7 @@ def options():
     n_dimensions = st.sidebar.radio('2 or 3 dimensional visualization?', [2, 3])
     n_top_words = st.sidebar.slider('Number of top words:', 3, 15, 5, step = 5)
     perplexity = st.sidebar.slider('TSNE perplexity:', 5, 50, 20, step = 1)
-    start = st.button('Run refml')
+    start = st.sidebar.button('Run refml')
     return data, n_topics, n_dimensions, n_top_words, perplexity, start
 
 
