@@ -26,8 +26,31 @@ def get_nmf_topics(model, n_top_words, n_topics, vectorizer):
     
     return pd.Series(word_dict, name = 'top words')
 
+def refml_nmf(preprocessed_words, n_topics, n_top_words):
+    
+    #vectorize preprocessed text
+    vectorizer = CountVectorizer(analyzer='word')#, max_features=5000)
+    x_counts = vectorizer.fit_transform(preprocessed_words)
 
-def refml_model(preprocessed_words, n_topics, n_top_words, n_dimensions, perplexity):
+    #Tfidf encoding
+    tfidf_transformer = TfidfTransformer()
+    X_train_tfidf = tfidf_transformer.fit_transform(x_counts)
+
+    #NMF topic modeling
+    model = NMF(n_components=n_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd').fit(X_train_tfidf.T)
+
+    #Match categories to original titles
+    topic_values = model.fit_transform(X_train_tfidf)
+    clustered = pd.DataFrame(topic_values.argmax(axis=1), columns = ['category'])
+
+    #get top words
+    top_words = get_nmf_topics(model, n_top_words, n_topics, vectorizer)
+
+    export = pd.merge(top_words, clustered, right_on='category', left_index=True)
+
+    return export
+
+def refml_nmf_tsne(preprocessed_words, n_topics, n_top_words, n_dimensions, perplexity):
     
     #vectorize preprocessed text
     vectorizer = CountVectorizer(analyzer='word')#, max_features=5000)

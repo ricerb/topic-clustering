@@ -1,5 +1,5 @@
 from refml.topic_modeling.preprocess import stem_and_tokenize
-from refml.topic_modeling.model import refml_model, visualize
+from refml.topic_modeling.model import refml_nmf_tsne, visualize
 import streamlit as st
 import pandas as pd
 import os
@@ -59,7 +59,7 @@ def load_and_process(data, df, text):
 @st.cache
 def model(df):
     ## run refml topic clustering model
-    reduced = refml_model(df.Text_Processed, n_topics, n_top_words, n_dimensions, perplexity)
+    reduced = refml_nmf_tsne(df.Text_Processed, n_topics, n_top_words, n_dimensions, perplexity)
 
     ## join model results to input dataframe
     export = reduced.join(df)
