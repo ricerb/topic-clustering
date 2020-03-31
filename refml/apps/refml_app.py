@@ -4,6 +4,10 @@ import streamlit as st
 import pandas as pd
 import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 st.markdown('# REFML Prototype')
 
 def upload():
@@ -85,8 +89,8 @@ if start:
     st.write(export)
 
     ## file download hack
-    import base64
-    csv = export.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    href = f'<a href="data:file/csv;base64,{b64}" download="export.csv" >Download Output CSV File</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    #import base64
+    #csv = export.to_csv(index=False)
+    #b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    #href = f'<a href="data:file/csv;base64,{b64}" download="export.csv" >Download Output CSV File</a>'
+    #st.markdown(href, unsafe_allow_html=True)
