@@ -42,10 +42,8 @@ def hero_titles_to_refml_input(usageid, Userid, Password):
     df['Text'] = df.TITLE.astype(str)
     return df
 
-def hero_titles_abstracts_to_refml_input(usageid):
+def hero_titles_abstracts_to_refml_input(usageid, Userid, Password):
     #query heroprd using Byron's login information
-    Userid = "rrice"
-    Password = "Temp02122020" 
     Host = "herodb.rtpnc.epa.gov"
     Port = "1521"
     SID = "heroprd"
