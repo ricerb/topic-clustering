@@ -26,10 +26,8 @@ def refml_to_sql(df, input_column, n_topics, n_top_words, n_dimensions, perplexi
                 '0': Float,
                 '1': Float})
 
-def hero_titles_to_refml_input(usageid):
+def hero_titles_to_refml_input(usageid, Userid, Password):
     #query heroprd using Byron's login information
-    Userid = "rrice"
-    Password = "Temp02122020" 
     Host = "herodb.rtpnc.epa.gov"
     Port = "1521"
     SID = "heroprd"
