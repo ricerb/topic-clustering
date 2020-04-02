@@ -74,24 +74,28 @@ def refml_nmf_tsne(preprocessed_words, n_topics, n_top_words, n_dimensions, perp
     nmf = model.fit(X_train_tfidf.T)
     nmf_embedded = TSNE(n_components=n_dimensions, perplexity=perplexity).fit_transform(nmf.components_.T)
 
+    #join nmf and tsne results and clean up column names
     export = pd.merge(top_words, clustered, right_on='category', left_index=True).join(pd.DataFrame(nmf_embedded))
+    if n_dimensions == 2:
+        export['dim_2'] = np.nan
+    export.columns = ['top_words', 'category', 'dim_0', 'dim_1', 'dim_2']
 
     return export
 
 def visualize(tsne_reduced_df, n_dimensions):
     
     if n_dimensions == 2:
-        fig = px.scatter(tsne_reduced_df, x= 0, y= 1, 
+        fig = px.scatter(tsne_reduced_df, x= 'dim_0', y= 'dim_1', 
                     color = 'category', color_continuous_scale = 'Rainbow',
-                   hover_data = ['top words', 'Title'])
+                   hover_data = ['top_words', 'Title'])
         fig.update_traces(marker = dict(size=5))
         fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
         return fig
     
     elif n_dimensions == 3:
-        fig = px.scatter_3d(tsne_reduced_df, x= 0, y= 1, z= 2, 
+        fig = px.scatter_3d(tsne_reduced_df, x= 'dim_0', y= 'dim_1', z= 'dim_2', 
                     color = 'category', color_continuous_scale = 'Rainbow',
-                   hover_data = ['top words', 'Title'])
+                   hover_data = ['top_words', 'Title'])
         fig.update_traces(marker = dict(size=3))
         return fig
     
