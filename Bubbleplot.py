@@ -33,7 +33,7 @@ yaxis = None
 
 
 # Start of script
-_max_width_()
+#_max_width_()
 st.title('BubblePlot')
 
 uploaded_file = st.file_uploader("Choose a CSV file", type = "csv")
@@ -45,9 +45,9 @@ if uploaded_file is not None:
         st.write(df)
 
 if df is not None:
-    # Remove rows where country was not reported
-    xaxis = st.selectbox("Select x-axis to graph", list(df.columns.values))
-    yaxis = st.selectbox("Select y-axis to graph", list(df.columns.values))
+    # Remove rows where country was not reported   
+    xaxis = st.selectbox("Select x-axis to graph", list(df.columns.values), index=0)
+    yaxis = st.selectbox("Select y-axis to graph", list(df.columns.values), index=1)
 
     if xaxis is not None and yaxis is not None:
         df = df[pd.notnull(df[xaxis])]
@@ -69,8 +69,11 @@ if df is not None:
         yval = list(legend[0])
         legend = pd.DataFrame(yval, columns = ['yaxis'])
         legend['xaxis']= 1.5
-       
-        # Create bubble plot with legend
+        legend2 = pd.DataFrame({"yaxis":[df['freq'].min()], 
+                    "xaxis":[1.5]}) 
+        legend = legend.append(legend2)
+
+        # Create bubble plot with legend 
         fig = make_subplots(rows=1, cols=10, 
                             specs = [[{'colspan' :8}, None, None, None, None, None, None, None, None, {}]],
                             subplot_titles=("Bubble Plot", "Legend (Count)"))
@@ -87,9 +90,9 @@ if df is not None:
                 color=df['freq'],
                 showscale = False),
             hovertemplate =
-            '%{x}'+
-            '<br>%{y}<br>'+
-            'Count:%{text}'), row=1, col=1)
+            '%{xaxis.title.text} : %{x}'+
+            '<br>%{yaxis.title.text} : %{y}<br>'+
+            'Count: %{text}'), row=1, col=1)
 
         fig.update_xaxes(linecolor="lightgrey",
                         gridcolor = 'lightgrey',
@@ -99,6 +102,9 @@ if df is not None:
                         zeroline = True,
                         showline = True,
                         mirror = True,
+                        automargin = True,
+                        title_standoff = 25,
+                        dtick = 1,
                         title_text = xaxis, row=1, col=1)
 
         fig.update_yaxes(linecolor = "lightgrey",
@@ -106,8 +112,12 @@ if df is not None:
                         showgrid = True,
                         zeroline = True,
                         showline = True,
+                        automargin = True,
                         mirror = True,
-                        title_text = yaxis, row=1, col=1)
+                        dtick = 1,
+                        title_text = yaxis,
+                      #  title_standoff = 70,
+                        tickangle=0, row=1, col=1)
 
         # Legend figure code 
         fig.add_trace(go.Scatter(
@@ -125,27 +135,34 @@ if df is not None:
 
         fig.update_xaxes(zeroline = False, 
                         showline = False, 
-                        showticklabels = False, 
+                        showticklabels = False,
                         showgrid = False,
                         tick0 = 1,
                         range = [1,2],
-                        rangemode = 'normal', row=1, col=10)
+                        rangemode = 'normal',
+                        row=1, col=10)
     
         fig.update_yaxes(showgrid = False,
+                        zeroline = False,
                         tickvals = legend['yaxis'][0:5],
                         row=1, col=10)
 
         fig.update_layout(plot_bgcolor = 'white', showlegend = False,
-                        height = 1300, width = 1300,
+                    #    height = 1300, width = 1300,
                         font=dict(
                                 family="Courier New, monospace",
                                 size=18,
                                 color="black"
-        ))
+                        ),
+                        margin=dict(l=120, r=20, t=50, b=20)
+
+        )
 
         st.subheader("Bubble Plot")
         st.plotly_chart(fig)
+       
 
     else:
         st.write("No CSV Selected Yet")
 
+    
