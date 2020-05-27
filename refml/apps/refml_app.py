@@ -4,6 +4,9 @@ import streamlit as st
 import pandas as pd
 import os
 
+path = os.path.dirname(__file__)
+os.chdir(path)
+
 st.markdown('# REFML Prototype')
 
 def upload():
