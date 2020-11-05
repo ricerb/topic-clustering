@@ -4,9 +4,9 @@ import streamlit as st
 import pandas as pd
 import os
 
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
+path = os.path.dirname(__file__)
+os.chdir(path)
+
 
 st.markdown('# REFML Prototype')
 
